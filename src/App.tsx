@@ -9,6 +9,7 @@ import { CartDrawer } from './components/CartDrawer';
 import { AiCustomerAgent } from './components/AiCustomerAgent';
 import { Footer } from './components/Footer';
 import { PRODUCTS_DATA } from './data/products';
+import { calculateTierPrice, BASE_UNIT_PRICE, STANDARD_DIMENSIONS, QUANTITY_TIERS } from './data/pricing';
 import { ProductItem, CartItem, OrderRecord } from './types';
 import { fetchOrders } from './services/supabase';
 import { Search, Check, ArrowRight, Bot, Sparkles } from 'lucide-react';
@@ -99,24 +100,29 @@ export default function App() {
       cartItemId: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       product,
       quantity: 1,
-      selectedMaterial: product.materials[0] || 'Acrílico 5mm con espacio reservado',
+      selectedMaterial: `Acrílico 5mm troquelado (${STANDARD_DIMENSIONS}) con peana`,
       selectedChip: product.nfcChip || 'NTAG213',
       selectedFunction: 'google_reviews',
       targetAction: 'google_reviews',
       customUrlOrData: 'https://g.page/r/example-vigo/review',
       businessNameOnProduct: 'Mi Negocio',
-      unitPrice: product.price
+      unitPrice: BASE_UNIT_PRICE
     };
     setCart((prev) => [...prev, defaultItem]);
-    showToast(`"${product.name}" añadido al pedido`);
+    showToast(`"${product.name}" (1 ud · ${BASE_UNIT_PRICE.toFixed(2)} €) añadido al pedido`);
   };
 
   const handleUpdateQuantity = (cartItemId: string, newQty: number) => {
     if (newQty <= 0) {
       setCart((prev) => prev.filter((it) => it.cartItemId !== cartItemId));
     } else {
+      const tieredPrice = calculateTierPrice(newQty).unitPrice;
       setCart((prev) =>
-        prev.map((it) => (it.cartItemId === cartItemId ? { ...it, quantity: newQty } : it))
+        prev.map((it) =>
+          it.cartItemId === cartItemId
+            ? { ...it, quantity: newQty, unitPrice: tieredPrice }
+            : it
+        )
       );
     }
   };
@@ -226,13 +232,45 @@ export default function App() {
               </div>
             </div>
 
+            {/* Volume Tiers Banner Strip */}
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                    Tarifa Oficial por Volumen ({STANDARD_DIMENSIONS}):
+                  </span>
+                  <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                    Desde 49,99 €/ud
+                  </span>
+                </div>
+                <span className="text-[11px] text-emerald-600 font-semibold">
+                  ✓ Descuentos progresivos automáticos de 1 a 200 unidades
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-1 text-center font-mono">
+                {QUANTITY_TIERS.map((t) => (
+                  <div key={t.quantity} className="p-2 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-indigo-50/50 transition-colors">
+                    <p className="text-xs font-bold text-slate-800">{t.label}</p>
+                    <p className="text-sm font-extrabold text-indigo-700 mt-0.5">
+                      {t.unitPrice.toFixed(2)} €
+                      <span className="text-[10px] text-slate-400 font-normal">/ud</span>
+                    </p>
+                    <p className="text-[10px] text-emerald-600 font-sans font-semibold mt-0.5">
+                      {t.discountPercent > 0 ? `-${t.discountPercent}% dto.` : 'Base'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Catalog Info Strip */}
             <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-200 pb-3">
               <span>
-                Mostrando <strong className="text-slate-800">{filteredProducts.length}</strong> modelos con espacio para etiqueta NFC + QR
+                Mostrando <strong className="text-slate-800">{filteredProducts.length}</strong> modelos troquelados con espacio reservado para chip
               </span>
               <span className="font-mono text-[11px] text-indigo-600">
-                Corte láser milimétrico en metacrilato
+                125 mm × 125 mm · Metacrilato bicapa 5mm
               </span>
             </div>
 

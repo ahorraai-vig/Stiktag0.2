@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { ProductItem, CartItem, NfcTargetFunction, UnitreeContactData } from '../types';
-import { X, Radio, Smartphone, Link2, Shield, Star, Globe, Phone, Mail, MessageSquare, Check } from 'lucide-react';
+import { X, Radio, Smartphone, Link2, Shield, Star, Globe, Phone, Mail, MessageSquare, Check, Sparkles, Percent } from 'lucide-react';
+import { QUANTITY_TIERS, calculateTierPrice, STANDARD_DIMENSIONS, BASE_UNIT_PRICE } from '../data/pricing';
 
 interface ProductConfigModalProps {
   product: ProductItem | null;
@@ -56,14 +57,8 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
     };
   }, [textToEncode]);
 
-  // Volume pricing calculation
-  let discountPercent = 0;
-  if (quantity >= 10) discountPercent = 15;
-  else if (quantity >= 5) discountPercent = 10;
-  else if (quantity >= 3) discountPercent = 5;
-
-  const unitPrice = product.price * (1 - discountPercent / 100);
-  const totalPrice = unitPrice * quantity;
+  // Volume pricing calculation based on quantity tiers (1, 5, 10, 20, 50, 100, 200)
+  const pricingInfo = calculateTierPrice(quantity);
 
   const handleAdd = () => {
     const newItem: CartItem = {
@@ -74,7 +69,10 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
       googleReviewUrl: selectedFunction === 'google_reviews' ? googleReviewUrl : undefined,
       unitreeData: selectedFunction === 'unitree_contact' ? unitreeData : undefined,
       businessNameOnProduct: businessName || 'Mi Negocio',
-      unitPrice
+      unitPrice: pricingInfo.unitPrice,
+      selectedMaterial: 'Acrílico 5mm troquelado (125mm x 125mm) con peana',
+      selectedChip: 'NTAG213',
+      customUrlOrData: selectedFunction === 'google_reviews' ? googleReviewUrl : unitreeData.webUrl
     };
 
     onAddToCart(newItem);
@@ -82,9 +80,9 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
       <div 
-        className="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+        className="bg-white rounded-2xl max-w-4xl w-full max-h-[94vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -93,7 +91,7 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
             <div className="flex items-center gap-2 text-xs font-mono text-indigo-600 font-semibold uppercase">
               <span>Cartel Acrílico Troquelado</span>
               <span aria-hidden="true">/</span>
-              <span>Espacio Reservado para Etiqueta NFC + QR</span>
+              <span>Medida Oficial: {STANDARD_DIMENSIONS}</span>
             </div>
             <h2 className="text-lg font-bold text-slate-900 mt-0.5">
               {product.name}
@@ -112,14 +110,16 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-12 flex-1 overflow-y-auto">
           
           {/* Left: Live Visual & QR Tag Slot */}
-          <div className="md:col-span-5 bg-slate-100 p-6 flex flex-col justify-between border-r border-slate-200">
+          <div className="md:col-span-5 bg-slate-100 p-5 flex flex-col justify-between border-r border-slate-200">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-700">Diseño Troquelado & Espacio NFC</span>
-                <span className="text-[11px] font-mono text-slate-500">{product.dimensions}</span>
+                <span className="text-xs font-semibold text-slate-700">Espacio Reservado para NFC + QR</span>
+                <span className="text-[11px] font-mono text-indigo-700 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">
+                  {STANDARD_DIMENSIONS}
+                </span>
               </div>
 
-              {/* Product Visual Container with embedded dynamic QR */}
+              {/* Product Visual Container */}
               <div className="relative rounded-xl overflow-hidden bg-white shadow-sm border border-slate-200 p-2 group">
                 <img
                   src={product.image}
@@ -132,13 +132,13 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
                 <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-md border border-slate-200 flex items-center gap-2">
                   <Radio className="w-3.5 h-3.5 text-indigo-600" />
                   <span className="text-[11px] font-mono font-bold text-slate-800">
-                    {selectedFunction === 'google_reviews' ? 'Solo Reseñas Google' : 'Perfil Unitree'}
+                    {selectedFunction === 'google_reviews' ? '⭐ Reseñas Google' : '🌐 Perfil Unitree'}
                   </span>
                 </div>
               </div>
 
               {/* Dynamic QR Preview Box */}
-              <div className="mt-4 p-3 bg-white rounded-xl border border-slate-200 flex items-center gap-4">
+              <div className="mt-4 p-3 bg-white rounded-xl border border-slate-200 flex items-center gap-3.5">
                 {qrDataUrl ? (
                   <img 
                     src={qrDataUrl} 
@@ -151,49 +151,136 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
                   </div>
                 )}
                 <div className="text-xs overflow-hidden">
-                  <p className="font-semibold text-slate-800">Etiqueta NFC + QR a Pegar</p>
+                  <p className="font-semibold text-slate-800">Pegatina NFC + QR Impreso</p>
                   <p className="text-[11px] text-slate-500 font-mono truncate mt-0.5">
                     {selectedFunction === 'google_reviews' ? googleReviewUrl : 'Unitree: Web + Tel + SMS + Email'}
                   </p>
-                  <p className="text-[10px] text-emerald-600 mt-1 font-medium">✓ Grabado con NFC Tools desde móvil</p>
+                  <p className="text-[10px] text-emerald-600 mt-1 font-medium">
+                    ✓ Se adhiere al hueco del metacrilato
+                  </p>
                 </div>
               </div>
-            </div>
 
-            {/* Explanatory note */}
-            <div className="mt-6 pt-4 border-t border-slate-200 text-xs text-slate-500 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <Shield className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                <span>Espacio reservado para pegar la etiqueta NFC con su QR impreso.</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                <span>Listo para que el cliente acerque el móvil sin instalar ninguna app.</span>
+              {/* Physical specifications notice */}
+              <div className="mt-4 p-3 bg-indigo-50/70 rounded-xl border border-indigo-100 text-[11px] text-indigo-900 space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Especificaciones de Fabricación</span>
+                </p>
+                <p className="text-indigo-800 text-[10px] leading-relaxed">
+                  Metacrilato bicapa de 5mm con troquelado láser a la silueta (125 × 125 mm), peana de madera o acrílico incluida y chip NFC NXP NTAG213 pre-programado.
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Right: Customization Controls (The 2 Core Functions) */}
-          <div className="md:col-span-7 p-6 space-y-5">
+          {/* Right: Tiers Selection & Configuration Controls */}
+          <div className="md:col-span-7 p-6 space-y-6">
             
-            {/* 1. Nombre / Marca para el cartel */}
+            {/* 1. SELECCIÓN DE TRAMOS DE COMPRA POR VOLUMEN */}
             <div>
-              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide mb-1.5">
-                Nombre de tu Negocio o Marca a Incluir en el Cartel
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                  1. Elige Cantidad (Escalado de Descuentos por Tramos)
+                </label>
+                <span className="text-[11px] text-emerald-600 font-bold">
+                  Desde {BASE_UNIT_PRICE.toFixed(2)} €/ud
+                </span>
+              </div>
+
+              {/* Quantity Tiers Grid */}
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+                {QUANTITY_TIERS.map((tier) => {
+                  const isSelected = quantity === tier.quantity;
+                  return (
+                    <button
+                      key={tier.quantity}
+                      type="button"
+                      onClick={() => setQuantity(tier.quantity)}
+                      className={`p-2 rounded-xl border text-center transition-all cursor-pointer relative ${
+                        isSelected
+                          ? 'border-indigo-600 bg-indigo-50/80 shadow-xs ring-2 ring-indigo-500/20'
+                          : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      {tier.popular && (
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[8px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-tighter">
+                          Top
+                        </span>
+                      )}
+                      <p className="text-xs font-bold text-slate-900">{tier.label}</p>
+                      <p className="text-[11px] font-mono text-indigo-700 font-semibold mt-0.5">
+                        {tier.unitPrice.toFixed(2)} €
+                      </p>
+                      <p className={`text-[9px] mt-0.5 font-medium ${tier.discountPercent > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {tier.discountPercent > 0 ? `-${tier.discountPercent}%` : 'Base'}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Fine-tune stepper or custom quantity */}
+              <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-700">Ajustar cantidad:</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-7 h-7 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      min={1}
+                      max={1000}
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-12 text-center font-mono font-bold text-slate-900 border border-slate-300 rounded-lg py-1 bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-7 h-7 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <p className="font-mono font-bold text-slate-900 text-sm">
+                    {pricingInfo.unitPrice.toFixed(2)} € / ud
+                  </p>
+                  {pricingInfo.discountPercent > 0 && (
+                    <p className="text-[11px] text-emerald-600 font-medium">
+                      Descuento del {pricingInfo.discountPercent}% aplicado
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. NOMBRE COMERCIAL / MARCA */}
+            <div>
+              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide mb-1">
+                2. Nombre de tu Negocio en el Cartel
               </label>
               <input
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Ej. Hamburguesería Central / Clínica Dental"
-                className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                placeholder="Ej. Clínica Dental Vigo / Burger Grill"
+                className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-600"
               />
             </div>
 
-            {/* 2. Selector de las 2 únicas funciones requeridas */}
+            {/* 3. SELECCIÓN DE LAS 2 FUNCIONES PERMITIDAS */}
             <div>
               <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide mb-2">
-                Elige la Función a Programar en el Chip NFC y QR:
+                3. Elige la Función del Chip NFC & Código QR
               </label>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -201,87 +288,88 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedFunction('google_reviews')}
-                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     selectedFunction === 'google_reviews'
-                      ? 'border-indigo-600 bg-indigo-50/70 shadow-xs ring-1 ring-indigo-500/30'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      ? 'border-indigo-600 bg-indigo-50/70 shadow-xs ring-1 ring-indigo-500'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
-                    <span className="font-bold text-xs text-slate-900">1. Solo Reseñas de Google</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                      <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+                      Solo Reseñas Google
+                    </span>
+                    {selectedFunction === 'google_reviews' && (
+                      <Check className="w-3.5 h-3.5 text-indigo-600" />
+                    )}
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                    Abre directamente el formulario de 5 estrellas en Google Maps para multiplicar tus opiniones.
+                  <p className="text-[11px] text-slate-500 leading-snug">
+                    Abre directamente la ficha de 5 estrellas en Google Maps para que el cliente valore sin buscar.
                   </p>
                 </button>
 
-                {/* Opción 2: Unitree Multi-Contacto */}
+                {/* Opción 2: Perfil Unitree (NFC Tools) */}
                 <button
                   type="button"
                   onClick={() => setSelectedFunction('unitree_contact')}
-                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     selectedFunction === 'unitree_contact'
-                      ? 'border-indigo-600 bg-indigo-50/70 shadow-xs ring-1 ring-indigo-500/30'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      ? 'border-indigo-600 bg-indigo-50/70 shadow-xs ring-1 ring-indigo-500'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-indigo-600" />
-                    <span className="font-bold text-xs text-slate-900">2. Unitree Multi-Contacto</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                      <Globe className="w-4 h-4 text-indigo-600" />
+                      Perfil Unitree Contacto
+                    </span>
+                    {selectedFunction === 'unitree_contact' && (
+                      <Check className="w-3.5 h-3.5 text-indigo-600" />
+                    )}
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                    Muestra los 4 accesos directos: 1 URL web, 1 teléfono de llamada, 1 SMS y 1 email.
+                  <p className="text-[11px] text-slate-500 leading-snug">
+                    Agrupa 4 accesos: Web URL, Llamada telefónica, SMS y Email (grabado con NFC Tools).
                   </p>
                 </button>
               </div>
             </div>
 
-            {/* 3. Inputs específicos de la opción seleccionada */}
+            {/* Inputs específicos según la opción elegida */}
             {selectedFunction === 'google_reviews' ? (
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                    Enlace de Google Maps / Reseñas 5★
-                  </label>
-                  <span className="text-[10px] text-indigo-600 font-medium">Link directo</span>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Link2 className="w-4 h-4" />
-                  </div>
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs animate-in fade-in">
+                <label className="block font-semibold text-slate-700">
+                  Enlace directo a tus Reseñas de Google Maps:
+                </label>
+                <div className="flex items-center gap-2">
                   <input
                     type="url"
                     value={googleReviewUrl}
                     onChange={(e) => setGoogleReviewUrl(e.target.value)}
-                    placeholder="https://g.page/r/.../review o enlace de tu perfil de Google"
-                    className="w-full pl-9 pr-3.5 py-2 text-xs font-mono bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                    placeholder="https://g.page/r/.../review"
+                    className="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-mono"
                   />
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Al aproximar el móvil con NFC o escanear el QR, el cliente accederá directamente a puntuar tu local.
+                  ¿No tienes el enlace a mano? Puedes facilitárnoslo más tarde por WhatsApp o a través de nuestro Asistente IA.
                 </p>
               </div>
             ) : (
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                    Datos del Perfil Unitree (NFC Tools)
-                  </label>
-                  <span className="text-[10px] text-indigo-600 font-medium">4 canales directos</span>
-                </div>
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs animate-in fade-in">
+                <p className="font-semibold text-slate-700">
+                  Datos para tu perfil Unitree (los 4 canales esenciales):
+                </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <span className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
                       <Globe className="w-3 h-3 text-indigo-600" />
-                      1. Enlace Web / URL o Red Social
+                      1. Enlace Web (URL)
                     </span>
                     <input
                       type="url"
                       value={unitreeData.webUrl}
                       onChange={(e) => setUnitreeData({ ...unitreeData, webUrl: e.target.value })}
-                      placeholder="https://tu-web.com o Instagram"
+                      placeholder="https://minegocio.com"
                       className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg font-mono"
                     />
                   </div>
@@ -289,7 +377,7 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
                   <div>
                     <span className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1">
                       <Phone className="w-3 h-3 text-indigo-600" />
-                      2. Teléfono para Llamadas
+                      2. Teléfono de Llamadas
                     </span>
                     <input
                       type="tel"
@@ -330,52 +418,39 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
                 </div>
 
                 <p className="text-[11px] text-slate-500">
-                  Nosotros pre-grabaremos estos 4 datos en el chip NFC y generaremos el QR con NFC Tools antes de enviártelo.
+                  Grabaremos estos 4 canales en el chip NFC y en el código QR con NFC Tools antes de enviarte el pedido.
                 </p>
               </div>
             )}
 
-            {/* 4. Cantidad & Descuento por Volumen */}
-            <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
+            {/* Resumen Económico del Tramo Seleccionado */}
+            <div className="p-4 bg-slate-900 rounded-xl text-white flex items-center justify-between">
               <div>
-                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                  Unidades
-                </label>
-                <div className="flex items-center gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-center font-bold text-slate-700 cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <span className="font-mono font-bold text-slate-900 text-sm w-8 text-center tabular-nums">
-                    {quantity}
+                <p className="text-xs text-slate-300">
+                  Pack de <strong>{quantity} {quantity === 1 ? 'unidad' : 'unidades'}</strong> ({STANDARD_DIMENSIONS}):
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xl font-extrabold font-mono text-white">
+                    {pricingInfo.total.toFixed(2)} €
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-center font-bold text-slate-700 cursor-pointer"
-                  >
-                    +
-                  </button>
+                  <span className="text-xs text-indigo-300 font-mono">
+                    ({pricingInfo.unitPrice.toFixed(2)} €/ud)
+                  </span>
                 </div>
+                {pricingInfo.savings > 0 && (
+                  <p className="text-[11px] text-emerald-400 font-semibold mt-0.5">
+                    ¡Ahorras {pricingInfo.savings.toFixed(2)} € (-{pricingInfo.discountPercent}%) comprando este pack!
+                  </p>
+                )}
               </div>
 
-              <div className="text-right">
-                {discountPercent > 0 && (
-                  <span className="text-[11px] font-semibold text-emerald-600 block">
-                    ¡Ahorras {discountPercent}% por volumen!
-                  </span>
-                )}
-                <div className="flex items-baseline justify-end gap-2">
-                  <span className="text-xl font-extrabold text-slate-900 font-mono tabular-nums">
-                    {totalPrice.toFixed(2)} €
-                  </span>
-                  <span className="text-xs text-slate-500">({unitPrice.toFixed(2)} €/ud)</span>
-                </div>
-                <span className="text-[10px] text-slate-400">IVA incluido · Pre-grabado con NFC Tools</span>
-              </div>
+              <button
+                type="button"
+                onClick={handleAdd}
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              >
+                <span>Añadir al Pedido</span>
+              </button>
             </div>
 
           </div>
@@ -383,9 +458,9 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
           <div className="text-xs text-slate-500 hidden sm:block">
-            <span>¿Necesitas cambiar los datos más adelante? Puedes pedírnoslo por WhatsApp o al Asistente IA.</span>
+            <span>Tramos oficiales: 1 ud (49,99€) · 5 uds · 10 uds · 20 uds · 50 uds · 100 uds · 200 uds.</span>
           </div>
 
           <div className="flex items-center gap-3 ml-auto">
@@ -394,15 +469,7 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
             >
-              Cancelar
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>Añadir al Pedido ({totalPrice.toFixed(2)} €)</span>
+              Cerrar
             </button>
           </div>
         </div>

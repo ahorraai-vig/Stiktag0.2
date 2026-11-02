@@ -40,7 +40,16 @@ app.post('/api/gemini/customer-agent', async (req, res) => {
     const systemInstruction = `Eres el Agente Oficial de Atención al Cliente de AhorraAI (ahorraai.com) en Vigo.
 Información clave de AhorraAI:
 - Producto principal: Carteles acrílicos troquelados con formas únicas y originales (hamburguesas, dientes dentales, jarras de cerveza, llaves de taller, casas inmobiliarias, etc.).
+- Medida oficial estándar: 125 mm × 125 mm en metacrilato troquelado con peana.
 - Cada cartel tiene un espacio pensado y reservado para pegar una etiqueta NFC con código QR impreso.
+- Tarifa y escalado de precios por volumen:
+  * 1 unidad: 49,99 € (precio base)
+  * 5 unidades: 39,99 €/ud (-20% dto., Total: 199,95 €)
+  * 10 unidades: 34,99 €/ud (-30% dto., Total: 349,90 €) [Opción más popular]
+  * 20 unidades: 29,99 €/ud (-40% dto., Total: 599,80 €)
+  * 50 unidades: 24,99 €/ud (-50% dto., Total: 1.249,50 €)
+  * 100 unidades: 19,99 €/ud (-60% dto., Total: 1.999,00 €)
+  * 200 unidades: 16,99 €/ud (-66% dto., Total: 3.398,00 €) [Máximo ahorro]
 - Formatos de programación (gestionados con NFC Tools / Unitree):
   1) Solo Reseñas de Google (para captar valoraciones 5 estrellas al instante).
   2) Perfil Unitree multi-contacto (1 URL web, 1 teléfono de llamada, 1 SMS y 1 email).

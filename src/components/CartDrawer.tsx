@@ -195,30 +195,56 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           )}
                         </div>
 
-                        <div className="mt-2.5 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => onUpdateQuantity(item.cartItemId, item.quantity - 1)}
-                              className="w-6 h-6 rounded border border-slate-300 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs"
-                            >
-                              -
-                            </button>
-                            <span className="font-mono text-xs font-bold w-6 text-center tabular-nums">
-                              {item.quantity}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => onUpdateQuantity(item.cartItemId, item.quantity + 1)}
-                              className="w-6 h-6 rounded border border-slate-300 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs"
-                            >
-                              +
-                            </button>
+                        <div className="mt-2.5 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => onUpdateQuantity(item.cartItemId, item.quantity - 1)}
+                                className="w-6 h-6 rounded border border-slate-300 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs"
+                              >
+                                -
+                              </button>
+                              <span className="font-mono text-xs font-bold w-7 text-center tabular-nums">
+                                {item.quantity} ud{item.quantity > 1 ? 's' : ''}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => onUpdateQuantity(item.cartItemId, item.quantity + 1)}
+                                className="w-6 h-6 rounded border border-slate-300 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs"
+                              >
+                                +
+                              </button>
+                            </div>
+                            
+                            <div className="text-right">
+                              <span className="text-xs font-bold font-mono text-slate-900 tabular-nums">
+                                {(item.unitPrice * item.quantity).toFixed(2)} €
+                              </span>
+                              <span className="text-[10px] text-slate-500 font-mono block">
+                                {item.unitPrice.toFixed(2)} €/ud
+                              </span>
+                            </div>
                           </div>
-                          
-                          <span className="text-xs font-bold font-mono text-slate-900 tabular-nums">
-                            {(item.unitPrice * item.quantity).toFixed(2)} €
-                          </span>
+
+                          {/* Quick volume tier jumps */}
+                          <div className="flex items-center gap-1 pt-1 border-t border-slate-200/60 overflow-x-auto pb-0.5">
+                            <span className="text-[9px] text-slate-400 uppercase font-semibold mr-0.5">Packs:</span>
+                            {[1, 5, 10, 20, 50, 100, 200].map((tierQty) => (
+                              <button
+                                key={tierQty}
+                                type="button"
+                                onClick={() => onUpdateQuantity(item.cartItemId, tierQty)}
+                                className={`px-1.5 py-0.5 text-[9px] font-mono rounded border transition-colors ${
+                                  item.quantity === tierQty
+                                    ? 'bg-indigo-600 text-white border-indigo-600 font-bold'
+                                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                                }`}
+                              >
+                                {tierQty}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
