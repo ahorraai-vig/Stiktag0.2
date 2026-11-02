@@ -1,12 +1,12 @@
 import React from 'react';
-import { ArrowRight, Sparkles, Smartphone, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowRight, Bot, ShieldCheck, Sparkles, Smartphone, QrCode } from 'lucide-react';
 
 interface HeroProps {
   onExploreCatalog: () => void;
-  onOpenDashboard: () => void;
+  onOpenAiAgent: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenDashboard }) => {
+export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenAiAgent }) => {
   return (
     <section className="relative overflow-hidden bg-white border-b border-slate-200">
       {/* Background ambient gradient */}
@@ -20,55 +20,56 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenDashboard })
             
             {/* Clean unboxed kicker */}
             <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-indigo-700 uppercase">
-              <span>AhorraAI Hardware & Smart Media</span>
+              <span>AhorraAI Vigo</span>
               <span aria-hidden="true" className="text-slate-300">/</span>
               <span>ahorraai.com</span>
               <span aria-hidden="true" className="text-slate-300">/</span>
-              <span>Corte Láser & Chips NTAG</span>
+              <span>Metacrilato Troquelado + NFC + QR</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]" style={{ textWrap: 'balance' }}>
-              Soluciones físicas <span className="text-indigo-600 underline decoration-indigo-200 underline-offset-4">QR y NFC</span> troqueladas a la forma exacta de tu marca.
+              Carteles acrílicos troquelados con <span className="text-indigo-600 underline decoration-indigo-200 underline-offset-4">espacio reservado</span> para tu chip NFC y QR.
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
-              Carteles acrílicos de sobremesa, posavasos, imanes de nevera, llaveros y vinilos con silueta de producto. Diseñados para optimizar flujos de trabajo en mesa o mostrador, acelerar reseñas Google de 5 estrellas y regalar merchandising con chip activo.
+              Diseños originales con siluetas profesionales para mostradores y mesas. Cada soporte cuenta con su hueco blanco milimétrico para pegar la etiqueta NFC con QR impreso. Listo para usar en <strong>Solo 2 funciones esenciales</strong>: directo a tus <strong>Reseñas de Google</strong> o a tu <strong>Perfil Multi-Contacto Unitree</strong> (Web, Teléfono, SMS y Email).
             </p>
 
             {/* CTAs */}
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <button
                 onClick={onExploreCatalog}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer"
               >
-                <span>Explorar Catálogo Troquelado</span>
+                <span>Ver Catálogo Troquelado</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               
               <button
-                onClick={onOpenDashboard}
-                className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm rounded-lg transition-colors flex items-center gap-2"
+                onClick={onOpenAiAgent}
+                className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
               >
-                <span>Panel de Negocios & Redirección</span>
+                <Bot className="w-4 h-4 text-indigo-600" />
+                <span>¿Dudas o cambios? Pregunta a la IA</span>
               </button>
             </div>
 
             {/* Trust points */}
             <div className="pt-6 border-t border-slate-100 grid grid-cols-3 gap-4 text-left">
               <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Compatibilidad</p>
-                <p className="text-sm font-bold text-slate-900 mt-0.5">100% Sin App</p>
-                <p className="text-xs text-slate-500 mt-0.5">iPhone & Android nativo</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Espacio Reservado</p>
+                <p className="text-sm font-bold text-slate-900 mt-0.5">Pegatina NFC + QR</p>
+                <p className="text-xs text-slate-500 mt-0.5">Integración limpia y estética</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Durabilidad</p>
-                <p className="text-sm font-bold text-slate-900 mt-0.5">Sin Batería</p>
-                <p className="text-xs text-slate-500 mt-0.5">+100.000 lecturas / 10 años</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">2 Modos Claros</p>
+                <p className="text-sm font-bold text-slate-900 mt-0.5">Google / Unitree</p>
+                <p className="text-xs text-slate-500 mt-0.5">Grabado directo desde móvil</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Control Digital</p>
-                <p className="text-sm font-bold text-slate-900 mt-0.5">Dinámico en la Nube</p>
-                <p className="text-xs text-slate-500 mt-0.5">Cambia URL sin reimprimir</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Atención y Cambios</p>
+                <p className="text-sm font-bold text-slate-900 mt-0.5">Agente IA & Soporte</p>
+                <p className="text-xs text-slate-500 mt-0.5">Cambio de enlaces fácil</p>
               </div>
             </div>
 
@@ -82,7 +83,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenDashboard })
               <div className="relative rounded-2xl overflow-hidden bg-slate-900 shadow-2xl border border-slate-800 group">
                 <img
                   src="/assets/aistudio/google_five_star_totem_1793573581807_785ce530.jpg"
-                  alt="Tótem Google Review 5 Estrellas con QR y NFC integrado"
+                  alt="Tótem Google Review 5 Estrellas con espacio para QR y chip NFC"
                   className="w-full h-80 sm:h-96 object-cover object-center transform transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
@@ -92,7 +93,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenDashboard })
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-indigo-300 font-mono font-medium">Troquelado Láser de Precisión</p>
-                      <p className="text-sm font-bold text-white">Tótem 5 Estrellas Google Review</p>
+                      <p className="text-sm font-bold text-white">Tótem 5 Estrellas Google con Espacio NFC</p>
                     </div>
                     <span className="bg-white/20 backdrop-blur-md px-2.5 py-1 rounded text-xs font-mono font-bold text-white">
                       NFC + QR
@@ -105,14 +106,14 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenDashboard })
               <div className="absolute -bottom-6 -left-6 bg-white p-3 rounded-xl shadow-xl border border-slate-200 hidden sm:flex items-center gap-3 max-w-xs animate-in fade-in duration-500">
                 <img
                   src="/assets/aistudio/diecut_burger_gourmet_1793500024227_42240587.jpg"
-                  alt="Hamburguesa de sobremesa"
+                  alt="Cartel troquelado Hamburguesa"
                   className="w-14 h-14 rounded-lg object-cover border border-slate-100"
                   referrerPolicy="no-referrer"
                 />
                 <div className="text-xs">
-                  <p className="font-bold text-slate-900">Formatos de Hostelería</p>
-                  <p className="text-slate-500 text-[11px] mt-0.5">Cartas táctiles y pago en mesa</p>
-                  <span className="text-indigo-600 font-semibold text-[11px]">Metacrilato 5mm bicapa</span>
+                  <p className="font-bold text-slate-900">Hostelería & Mesas</p>
+                  <p className="text-slate-500 text-[11px] mt-0.5">Hueco reservado para chip</p>
+                  <span className="text-indigo-600 font-semibold text-[11px]">Acrílico troquelado</span>
                 </div>
               </div>
 
@@ -120,13 +121,13 @@ export const Hero: React.FC<HeroProps> = ({ onExploreCatalog, onOpenDashboard })
               <div className="absolute -top-4 -right-4 bg-white p-2.5 rounded-xl shadow-lg border border-slate-200 hidden sm:flex items-center gap-2">
                 <img
                   src="/assets/aistudio/diecut_real_estate_house_1793489456675_9877f008.jpg"
-                  alt="Pack Inmobiliaria"
+                  alt="Pack Inmobiliaria Casa"
                   className="w-10 h-10 rounded-md object-cover"
                   referrerPolicy="no-referrer"
                 />
                 <div className="text-[11px]">
-                  <p className="font-bold text-slate-900">Pack Tótem + Llaveros</p>
-                  <p className="text-emerald-600 font-medium">Listo para grabar</p>
+                  <p className="font-bold text-slate-900">Tótem + Llavero Casa</p>
+                  <p className="text-emerald-600 font-medium">Unitree o Reseñas</p>
                 </div>
               </div>
 

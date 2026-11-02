@@ -101,7 +101,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </span>
               )}
             </div>
-            <span className="text-[10px] text-slate-400 block">IVA incluido · NFC NTAG grabado</span>
+            <span className="text-[10px] text-slate-500 block">Espacio reservado para etiqueta NFC + QR</span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -111,7 +111,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 e.stopPropagation();
                 onOpenConfigurator(product);
               }}
-              title="Personalizar logo, formato y URL"
+              title="Configurar Reseñas Google o Perfil Unitree"
               className="p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <Sliders className="w-4 h-4" />

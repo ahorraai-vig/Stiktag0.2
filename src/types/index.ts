@@ -25,14 +25,20 @@ export type ProductSector =
 
 export type NfcChipType = 'NTAG213' | 'NTAG215' | 'NTAG216';
 
-export type ActionType = 
-  | 'google_reviews'
-  | 'menu_digital'
-  | 'vcard_contact'
-  | 'wifi_connect'
-  | 'whatsapp_direct'
-  | 'dynamic_redirect'
-  | 'custom_url';
+// The 2 core functions for the MVP
+export type NfcTargetFunction = 'google_reviews' | 'unitree_contact';
+
+export type ActionType = 'google_reviews' | 'unitree_contact' | 'digital_menu' | 'whatsapp_direct';
+
+export interface UnitreeContactData {
+  webUrl: string;
+  phone: string;
+  sms: string;
+  email: string;
+  // Aliases for convenience
+  websiteUrl?: string;
+  smsPhone?: string;
+}
 
 export interface ProductItem {
   id: string;
@@ -48,7 +54,7 @@ export interface ProductItem {
   materials: string[];
   dimensions: string;
   nfcChip: NfcChipType;
-  popularAction: ActionType;
+  popularAction?: string;
   badge?: string;
   includesKeyring?: boolean;
 }
@@ -57,46 +63,15 @@ export interface CartItem {
   cartItemId: string;
   product: ProductItem;
   quantity: number;
-  selectedMaterial: string;
-  selectedChip: NfcChipType;
-  targetAction: ActionType;
-  customUrlOrData: string;
+  selectedFunction: NfcTargetFunction;
+  googleReviewUrl?: string;
+  unitreeData?: UnitreeContactData;
   businessNameOnProduct: string;
   unitPrice: number;
-}
-
-export interface BusinessDevice {
-  id: string;
-  productId: string;
-  productName: string;
-  format: string;
-  image: string;
-  serialNumber: string;
-  locationName: string;
-  targetAction: ActionType;
-  targetUrl: string;
-  dynamicRedirectEnabled: boolean;
-  active: boolean;
-  totalTaps: number;
-  totalScans: number;
-  lastInteraction: string;
-  assignedDate: string;
-}
-
-export interface RegisteredBusiness {
-  id: string;
-  tradeName: string;
-  taxId: string; // CIF/NIF
-  sector: ProductSector;
-  contactEmail: string;
-  phone: string;
-  address: string;
-  city: string;
-  googleReviewUrl: string;
-  primaryWebsite: string;
-  whatsappContact: string;
-  devices: BusinessDevice[];
-  createdAt: string;
+  selectedMaterial?: string;
+  selectedChip?: string;
+  targetAction?: string;
+  customUrlOrData?: string;
 }
 
 export interface OrderRecord {
@@ -112,3 +87,43 @@ export interface OrderRecord {
   status: 'Diseño Troquel' | 'Corte Láser & Impresión' | 'Grabado NFC' | 'Enviado';
   trackingNumber?: string;
 }
+
+export interface DbProduct {
+  id: string;
+  name: string;
+  format: string;
+  sector: string;
+  price: number;
+  image: string;
+  description: string;
+  created_at?: string;
+}
+
+export interface DbSmartTag {
+  id: string;
+  business_id: string;
+  device_name: string;
+  format: string;
+  target_url: string;
+  target_action: string;
+  total_taps: number;
+  dynamic_redirect_enabled: boolean;
+  nfc_chip: string;
+}
+
+export interface DbOrder {
+  id?: string;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
+  items: unknown;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  total: number;
+  status: string;
+  tracking_number?: string;
+  created_at?: string;
+}
+
+export type DemoScenarioId = 'reviews' | 'unitree';

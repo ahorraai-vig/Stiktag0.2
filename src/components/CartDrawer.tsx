@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { CartItem, OrderRecord } from '../types';
-import { X, Trash2, ArrowRight, ShieldCheck, CheckCircle2, Truck, CreditCard, Sparkles } from 'lucide-react';
+import { CartItem, OrderRecord, DbOrder } from '../types';
+import { X, Trash2, ArrowRight, CheckCircle2, Truck, CreditCard } from 'lucide-react';
+import { insertOrder } from '../services/supabase';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -38,12 +39,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const tax = subtotal * 0.21;
   const total = subtotal + shipping;
 
-  const handleProcessOrder = (e: React.FormEvent) => {
+  const handleProcessOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !customerEmail || !customerAddress) return;
 
+    const orderNumber = `AH-${Math.floor(100000 + Math.random() * 900000)}`;
+    const trackingNumber = `ES-EXP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
     const newOrder: OrderRecord = {
-      orderNumber: `AH-${Math.floor(100000 + Math.random() * 900000)}`,
+      orderNumber,
       date: new Date().toISOString().split('T')[0],
       customerName,
       customerEmail,
@@ -53,8 +57,34 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       shipping,
       total,
       status: 'Diseño Troquel',
-      trackingNumber: `ES-EXP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+      trackingNumber
     };
+
+    // Asynchronously persist into Supabase 'orders' table
+    const dbOrderPayload: DbOrder = {
+      order_number: orderNumber,
+      customer_name: customerName,
+      customer_email: customerEmail,
+      items: cart.map(c => ({
+        id: c.product.id,
+        name: c.product.name,
+        quantity: c.quantity,
+        function: c.selectedFunction,
+        chip: c.selectedChip || c.product.nfcChip || 'NTAG213',
+        unitPrice: c.unitPrice
+      })),
+      subtotal,
+      tax,
+      shipping,
+      total,
+      status: 'Diseño Troquel',
+      tracking_number: trackingNumber,
+      created_at: new Date().toISOString()
+    };
+
+    insertOrder(dbOrderPayload).catch((err) => {
+      console.warn('Supabase order insert note:', err);
+    });
 
     setLastOrder(newOrder);
     onOrderCompleted(newOrder);
@@ -135,11 +165,34 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             <span className="font-semibold text-slate-700">Texto:</span> {item.businessNameOnProduct}
                           </p>
                           <p className="truncate">
-                            <span className="font-semibold text-slate-700">Chip:</span> {item.selectedChip} · {item.targetAction.replace('_', ' ')}
+                            <span className="font-semibold text-slate-700">Función:</span>{' '}
+                            <span className="font-medium text-slate-900">
+                              {item.selectedFunction === 'google_reviews'
+                                ? '⭐ Solo Reseñas Google'
+                                : '🌐 Perfil Unitree Multi-Contacto'}
+                            </span>{' '}
+                            · <span className="font-mono">{item.selectedChip || item.product.nfcChip || 'NTAG213'}</span>
                           </p>
-                          <p className="truncate font-mono text-[10px] text-indigo-600">
-                            {item.customUrlOrData}
-                          </p>
+                          {item.selectedFunction === 'google_reviews' ? (
+                            <p className="truncate font-mono text-[10px] text-indigo-600">
+                              {item.googleReviewUrl || item.customUrlOrData || 'https://g.page/r/.../review'}
+                            </p>
+                          ) : (
+                            <div className="text-[10px] font-mono text-slate-600 space-y-0.5 bg-white/80 p-1.5 rounded border border-slate-200 mt-1">
+                              {(item.unitreeData?.webUrl || item.unitreeData?.websiteUrl) && (
+                                <p className="truncate">🌐 {item.unitreeData?.webUrl || item.unitreeData?.websiteUrl}</p>
+                              )}
+                              {item.unitreeData?.phone && (
+                                <p className="truncate">📞 {item.unitreeData.phone}</p>
+                              )}
+                              {(item.unitreeData?.sms || item.unitreeData?.smsPhone) && (
+                                <p className="truncate">💬 {item.unitreeData?.sms || item.unitreeData?.smsPhone}</p>
+                              )}
+                              {item.unitreeData?.email && (
+                                <p className="truncate">✉️ {item.unitreeData.email}</p>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         <div className="mt-2.5 flex items-center justify-between">
@@ -314,7 +367,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   ¡Pedido en Producción!
                 </h3>
                 <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto">
-                  Hemos registrado tus {lastOrder.items.reduce((a, b) => a + b.quantity, 0)} unidades. Nuestro equipo prepara los archivos vectoriales para corte láser y codificación de los chips NFC.
+                  Hemos registrado tus {lastOrder.items.reduce((a: number, b: CartItem) => a + b.quantity, 0)} unidades. Nuestro equipo prepara los archivos vectoriales para corte láser y codificación de los chips NFC.
                 </p>
               </div>
 
