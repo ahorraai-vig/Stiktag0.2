@@ -12,9 +12,28 @@ import { PRODUCTS_DATA } from './data/products';
 import { calculateTierPrice, BASE_UNIT_PRICE, STANDARD_DIMENSIONS, QUANTITY_TIERS } from './data/pricing';
 import { ProductItem, CartItem, OrderRecord } from './types';
 import { fetchOrders } from './services/supabase';
-import { Search, Check, ArrowRight, Bot, Sparkles } from 'lucide-react';
+import { Search, Check, ArrowRight, Bot, Sparkles, Building2 } from 'lucide-react';
+import { AdminBusinesses } from './components/AdminBusinesses';
+import { PublicBusinessProfile } from './components/PublicBusinessProfile';
+import { RESERVED_SLUGS } from './utils/slug';
+
+function parseInitialRoute(): { view: 'store' | 'admin' | 'public-profile'; slug: string | null } {
+  try {
+    const rawPath = window.location.pathname.replace(/^\/+/, '').split('/')[0].trim();
+    if (!rawPath) return { view: 'store', slug: null };
+    if (rawPath === 'admin') return { view: 'admin', slug: null };
+    if (!RESERVED_SLUGS.has(rawPath.toLowerCase())) {
+      return { view: 'public-profile', slug: rawPath };
+    }
+  } catch {
+    // fallback
+  }
+  return { view: 'store', slug: null };
+}
 
 export default function App() {
+  const [routeState, setRouteState] = useState(() => parseInitialRoute());
+
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('ahorraai_cart');
@@ -85,6 +104,33 @@ export default function App() {
     return () => { mounted = false; };
   }, []);
 
+  // Listen to browser navigation (back/forward)
+  useEffect(() => {
+    const handlePopState = () => {
+      setRouteState(parseInitialRoute());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateToAdmin = () => {
+    window.history.pushState({}, '', '/admin');
+    setRouteState({ view: 'admin', slug: null });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateToStore = () => {
+    window.history.pushState({}, '', '/');
+    setRouteState({ view: 'store', slug: null });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateToPublicSlug = (slug: string) => {
+    window.history.pushState({}, '', `/${slug}`);
+    setRouteState({ view: 'public-profile', slug });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -154,6 +200,17 @@ export default function App() {
 
   const cartTotalCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
+  // 1. Direct Public Page for NFC / QR Short Slugs (e.g. ahorraai.com/m7k2)
+  if (routeState.view === 'public-profile' && routeState.slug) {
+    return (
+      <PublicBusinessProfile
+        slug={routeState.slug}
+        onNavigateHome={navigateToStore}
+        onOpenStoreCatalog={navigateToStore}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
@@ -170,18 +227,29 @@ export default function App() {
         cartCount={cartTotalCount}
         openCart={() => setIsCartOpen(true)}
         onOpenAiAgent={() => setIsAiAgentOpen(true)}
+        onNavigateAdmin={navigateToAdmin}
+        onNavigateHome={navigateToStore}
+        isAdminView={routeState.view === 'admin'}
       />
 
-      {/* Main Content */}
+      {/* Main Content: Admin View or Store View */}
       <main className="flex-1">
-        {/* Hero Section */}
-        <Hero
-          onExploreCatalog={() => {
-            const el = document.getElementById('catalogo');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-          onOpenAiAgent={() => setIsAiAgentOpen(true)}
-        />
+        {routeState.view === 'admin' ? (
+          <AdminBusinesses
+            onNavigateToPublicSlug={navigateToPublicSlug}
+            onNavigateBackToStore={navigateToStore}
+            showToast={showToast}
+          />
+        ) : (
+          <>
+            {/* Hero Section */}
+            <Hero
+              onExploreCatalog={() => {
+                const el = document.getElementById('catalogo');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onOpenAiAgent={() => setIsAiAgentOpen(true)}
+            />
 
         {/* Interactive NFC Customer Experience Demo */}
         <InteractiveNfcDemo />
@@ -347,25 +415,31 @@ export default function App() {
             </div>
           </div>
         </section>
+        </>
+        )}
       </main>
 
       {/* Product Customization Modal (with 2 clean options: Google Reviews or Unitree) */}
-      <ProductConfigModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-        onAddToCart={handleAddToCart}
-      />
+      {selectedProduct && (
+        <ProductConfigModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={handleAddToCart}
+        />
+      )}
 
       {/* Cart Drawer */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cart={cart}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-        onClearCart={handleClearCart}
-        onOrderCompleted={handleOrderCompleted}
-      />
+      {isCartOpen && (
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          cart={cart}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveItem}
+          onClearCart={handleClearCart}
+          onOrderCompleted={handleOrderCompleted}
+        />
+      )}
 
       {/* AI Customer Support & Change Agent Modal/Widget */}
       <AiCustomerAgent

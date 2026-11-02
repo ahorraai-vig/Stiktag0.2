@@ -126,4 +126,38 @@ export interface DbOrder {
   created_at?: string;
 }
 
+export interface Business {
+  id: string;
+  name: string;
+  city: string;
+  sector: string;
+  phone?: string;
+  website?: string;
+  email?: string;
+  logoUrl?: string;
+  description?: string;
+  googleReviewsUrl?: string;
+  slug: string;
+  statusRecord: 'DICHO' | 'OBSERVADO' | 'SIN_CONFIRMAR';
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DbBusiness {
+  id?: string;
+  name: string;
+  city: string;
+  sector: string;
+  phone?: string | null;
+  website?: string | null;
+  email?: string | null;
+  logo_url?: string | null;
+  description?: string | null;
+  google_reviews_url?: string | null;
+  slug: string;
+  status_record?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export type DemoScenarioId = 'reviews' | 'unitree';

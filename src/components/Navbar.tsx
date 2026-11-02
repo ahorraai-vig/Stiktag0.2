@@ -1,20 +1,33 @@
-import React from 'react';
-import { ShoppingBag, Bot, Sparkles } from 'lucide-react';
+import { ShoppingBag, Bot, Building2 } from 'lucide-react';
 
 interface NavbarProps {
   cartCount: number;
   openCart: () => void;
   onOpenAiAgent: () => void;
   onNavigateSection?: (sectionId: string) => void;
+  onNavigateAdmin?: () => void;
+  onNavigateHome?: () => void;
+  isAdminView?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   cartCount,
   openCart,
   onOpenAiAgent,
-  onNavigateSection
+  onNavigateSection,
+  onNavigateAdmin,
+  onNavigateHome,
+  isAdminView = false,
 }) => {
   const handleNavClick = (sectionId: string) => {
+    if (isAdminView && onNavigateHome) {
+      onNavigateHome();
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return;
+    }
     const el = document.getElementById(sectionId);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
@@ -69,8 +82,27 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </nav>
 
-        {/* Action cluster: Asistente IA + Carrito */}
+        {/* Action cluster: Negocios Admin + Asistente IA + Carrito */}
         <div className="flex items-center gap-2.5 shrink-0">
+          
+          {/* Negocios (Admin) Section Toggle */}
+          {onNavigateAdmin && (
+            <button
+              onClick={isAdminView ? onNavigateHome : onNavigateAdmin}
+              className={`px-3 py-2 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+                isAdminView
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>{isAdminView ? 'Ver Tienda' : 'Negocios'}</span>
+              <span className={`text-[10px] px-1 py-0.2 rounded font-mono ${isAdminView ? 'bg-indigo-700 text-indigo-100' : 'bg-slate-200 text-slate-600'}`}>
+                Admin
+              </span>
+            </button>
+          )}
+
           <button
             onClick={onOpenAiAgent}
             aria-label="Abrir asistente de soporte IA"

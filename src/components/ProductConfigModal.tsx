@@ -15,8 +15,6 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
   onClose,
   onAddToCart
 }) => {
-  if (!product) return null;
-
   const [quantity, setQuantity] = useState(1);
   const [selectedFunction, setSelectedFunction] = useState<NfcTargetFunction>('google_reviews');
   const [googleReviewUrl, setGoogleReviewUrl] = useState('https://g.page/r/CbUrgErG0uRmEt/review');
@@ -37,6 +35,8 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
   // Generate QR code dynamically with cancellation
   useEffect(() => {
     let isMounted = true;
+    if (!product) return;
+
     QRCode.toDataURL(textToEncode, {
       width: 250,
       margin: 1,
@@ -55,7 +55,9 @@ export const ProductConfigModal: React.FC<ProductConfigModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [textToEncode]);
+  }, [textToEncode, product]);
+
+  if (!product) return null;
 
   // Volume pricing calculation based on quantity tiers (1, 5, 10, 20, 50, 100, 200)
   const pricingInfo = calculateTierPrice(quantity);
