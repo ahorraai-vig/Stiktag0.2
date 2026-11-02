@@ -1,0 +1,6 @@
+{
+  "name": "AhorraAI - Soluciones Físicas QR & NFC",
+  "description": "Plataforma oficial de AhorraAI para soluciones inteligentes con QR y chips NFC integrados en carteles acrílicos, imanes, llaveros, pegatinas y merchandising die-cut para empresas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
